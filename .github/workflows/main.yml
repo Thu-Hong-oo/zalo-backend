@@ -36,7 +36,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ec2-user/zalo-backend
-          git pull origin main
+          git pull origin main --rebase
           echo "${{ secrets.ENV_FILE }}" > .env
           docker build -t zalo-backend .
           docker stop zalo-backend || true
