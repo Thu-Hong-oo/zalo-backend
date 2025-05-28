@@ -1,0 +1,200 @@
+POST /groups - Tạo nhóm mới
+GET /groups/:groupId - Lấy thông tin nhóm
+PUT /groups/:groupId - Cập nhật thông tin nhóm
+DELETE /groups/:groupId - Xóa nhóm (soft delete)
+
+POST /groups/:groupId/members - Thêm thành viên
+GET /groups/:groupId/members - Lấy danh sách thành viên
+PUT /groups/:groupId/members/:memberId/role - Cập nhật vai trò thành viên
+DELETE /groups/:groupId/members/:memberId - Xóa thành viên
+
+GET /groups/users/:userId/groups - Lấy danh sách nhóm của người dùng
+PUT /groups/:groupId/members/:memberId/last-read - Cập nhật thời gian đọc tin nhắn cuối cùng
+
+Bảng group-message-zalolite (GROUP_MESSAGE_TABLE):
+PK: groupMessageId (String)
+SK: createdAt (String)
+Index: groupIndex (groupId, createdAt)
+Index: senderIndex (senderId, createdAt)
+####
+Bảng message-zalolite (MESSAGE_TABLE):
+PK: groupMessageId (String)
+SK: createdAt (String)
+Index: conversationIndex (conversationId, timestamp)
+Index: receiverIndex (receiverPhone, timestamp)
+Index: senderIndex (senderPhone, timestamp)
+Các trường hợp chuyển tiếp cần xử lý:
+
+tôi đã có
+GET /:groupId/messages - Lấy tin nhắn trong nhóm
+POST /:groupId/messages - Gửi tin nhắn trong nhóm
+DELETE /:groupId/messages/:messageId - Xóa tin nhắn trong nhóm
+
+xóa có nghĩa là xóa tin nhắn chỉ ở bên phía người thực hiện thao tác này
+
+------
+Mô tả chức năng chuyển tiếp tin nhắn:
+Cho phép chuyển tiếp tin nhắn từ nhóm sang:
+Nhóm khác
+Cuộc trò chuyện cá nhân
+Khi chuyển tiếp:
+Tin nhắn mới được tạo với metadata chứa thông tin về tin nhắn gốc
+Người gửi nhận được thông báo xác nhận
+Người nhận nhận được tin nhắn realtime nếu đang online
+Các thông tin được lưu:
+Nội dung tin nhắn gốc
+Người gửi gốc
+Thời gian chuyển tiếp
+Loại tin nhắn (text/file)
+
+`chatGroup/index.js`:
+
+1. **Lấy danh sách tin nhắn nhóm**
+   - Method: GET
+   - Endpoint: `/api/chat-group/:groupId/messages`
+   - Query params: 
+     - `limit` (mặc định: 50)
+     - `before` (mặc định: true)
+     - `lastEvaluatedKey` (cho phân trang)
+   - Yêu cầu: Authorization token
+
+   Trả về response dạng:
+   {
+  "status": "success",
+  "data": {
+    "messages": {
+      "21/4/2025": [
+        {
+          "content": "aloha nha",
+          "metadata": {},
+          "updatedAt": "2025-04-21T04:25:56.678Z",
+          "groupId": "29223937-60fc-47cf-8afe-f09d8dd49795",
+          "senderId": "554d27e4-eeca-469a-a87c-9f208a0533e4",
+          "status": "sent",
+          "createdAt": "2025-04-21T04:25:56.678Z",
+          "fileType": null,
+          "type": "text",
+          "groupMessageId": "8ed10c4f-9114-4ca9-948d-78a4c79337fc",
+          "isRecalled": false
+        }
+      ],
+      "20/4/2025": [
+        {
+          "content": "con chó kêu gâu gâu",
+          "metadata": {},
+          "updatedAt": "2025-04-20T16:40:34.527Z",
+          "groupId": "29223937-60fc-47cf-8afe-f09d8dd49795",
+          "senderId": "554d27e4-eeca-469a-a87c-9f208a0533e4",
+          "status": "sent",
+          "createdAt": "2025-04-20T16:40:34.527Z",
+          "fileType": null,
+          "type": "text",
+          "groupMessageId": "13f29624-9019-43a7-b0d6-2f8f3afa35b6",
+          "isRecalled": false
+        }
+      ]
+    },
+    "pagination": {
+      "hasMore": false,
+      "total": 2,
+      "lastEvaluatedKey": null
+    }
+  }
+}
+
+1.1. Lấy tin nhắn theo ngày
+- Method: GET
+   - Endpoint: `/api/chat-group/:groupId/messages?date=YYYY-MM-DD`
+
+
+2. **Gửi tin nhắn nhóm**
+   - Method: POST
+   - Endpoint: `/api/chat-group/:groupId/messages`
+     {
+       "content": "Nội dung tin nhắn",
+       "fileUrl": "URL file (nếu có)",
+       "fileType": "Loại file (nếu có)"
+     }
+   - Yêu cầu: Authorization token
+
+3. **Xóa tin nhắn nhóm**
+   - Method: DELETE
+   - Endpoint: `/api/chat-group/:groupId/messages/:messageId`
+   - Yêu cầu: Authorization token
+
+   {
+  "status": "success",
+  "message": "Đã xóa tin nhắn",
+  "data": {
+    "deletedMessageId": "cf0aa89b-72a6-42b8-b575-a9f5c1f161fb",
+    "deletedBy": "554d27e4-eeca-469a-a87c-9f208a0533e4",
+    "originalMessage": {
+      "content": "demo các chức năng",
+      "metadata": {},
+      "updatedAt": "2025-04-21T09:28:25.134Z",
+      "groupId": "29223937-60fc-47cf-8afe-f09d8dd49795",
+      "senderId": "554d27e4-eeca-469a-a87c-9f208a0533e4",
+      "status": "sent",
+      "createdAt": "2025-04-21T09:28:25.134Z",
+      "fileType": null,
+      "type": "text",
+      "groupMessageId": "cf0aa89b-72a6-42b8-b575-a9f5c1f161fb"
+    }
+  }
+}
+
+4. **Thu hồi tin nhắn nhóm**
+   - Method: PUT
+   - Endpoint: `/api/chat-group/:groupId/messages/:messageId/recall`
+   - Yêu cầu: Authorization token
+   - Giới hạn: Chỉ có thể thu hồi trong 24h
+
+   {
+  "status": "success",
+  "message": "Đã thu hồi tin nhắn thành công",
+  "data": {
+    "messageId": "cf0aa89b-72a6-42b8-b575-a9f5c1f161fb",
+    "groupId": "29223937-60fc-47cf-8afe-f09d8dd49795",
+    "content": "Tin nhắn đã bị thu hồi",
+    "recalledBy": "554d27e4-eeca-469a-a87c-9f208a0533e4",
+    "recalledAt": "2025-04-21T09:30:40.506Z"
+  }
+}
+
+5. **Chuyển tiếp tin nhắn nhóm/conservation(cá nhân chat 1-1)**
+   - Method: POST
+   - Endpoint: `/api/chat-group/:groupId/messages/forward`
+   - Body:
+     ```json
+     {
+       "sourceMessageId": "ID tin nhắn gốc",
+       "targetId": "ID nhóm/cuộc trò chuyện đích",
+       "targetType": "group/conversation"
+     }
+     ```
+   - Yêu cầu: Authorization token
+
+Tất cả các API đều:
+- Yêu cầu xác thực qua token
+- Kiểm tra quyền thành viên trong nhóm
+- Hỗ trợ realtime thông qua socket.io
+
+Cấu trúc:
+Khi xóa, thu hồi sẽ tạo mới record copy từ record gốc nhưng sửa lại metadata:
+Xóa: metadata : { "deletedMessageId" : { "S" : "ea4ffa26-2477-4e00-9fe3-54c3c4324715" }, "originalType" : { "S" : "text" }, "originalSender" : { "S" : "554d27e4-eeca-469a-a87c-9f208a0533e4" }, "deletedBy" : { "S" : "554d27e4-eeca-469a-a87c-9f208a0533e4" }, "originalContent" : { "S" : "Nhắn để xóa thôi chẳng để làm gì" } }
+    status: deleted, type: delete_record, tin nhắn gốc KHÔNG cập nhật lại status
+
+Thu Hồi: metadata :{ "recalledAt" : { "S" : "2025-04-21T09:20:58.835Z" }, "originalMessageId" : { "S" : "ea4ffa26-2477-4e00-9fe3-54c3c4324715" }, "originalSender" : { "S" : "554d27e4-eeca-469a-a87c-9f208a0533e4" }, "originalContent" : { "S" : "Nhắn để xóa thôi chẳng để làm gì" }, "recalledBy" : { "S" : "554d27e4-eeca-469a-a87c-9f208a0533e4" } }
+status: recalled, type: recall_record
+
+Cấu trúc chung của bảng
+groupMessageId (String)
+createdAt (String)
+content
+fileType
+groupId
+metadata ( ban đầu là {})
+senderId
+status
+type ( nếu là recall thì sẽ ở trạng thái recall_record)
+updatedAt

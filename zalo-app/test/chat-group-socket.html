@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Group Chat Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #messages {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      #messageInput {
+        width: 70%;
+        padding: 5px;
+      }
+      button {
+        padding: 5px 10px;
+        margin: 5px;
+      }
+      .message {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .message.sent {
+        background-color: #e3f2fd;
+        margin-left: 20%;
+      }
+      .message.received {
+        background-color: #f5f5f5;
+        margin-right: 20%;
+      }
+      .message.system {
+        background-color: #fff3e0;
+        text-align: center;
+      }
+      .message.error {
+        background-color: #ffebee;
+        color: #d32f2f;
+      }
+      .typing {
+        color: #666;
+        font-style: italic;
+      }
+      .input-group {
+        margin-bottom: 10px;
+      }
+      .input-group input {
+        width: 70%;
+        padding: 5px;
+        margin-right: 5px;
+      }
+      .message-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .message-actions button {
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .recall-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+      }
+      .recall-btn:hover {
+        background: #d32f2f;
+      }
+      .recalled-message {
+        font-style: italic;
+        color: #666;
+      }
+      .message-content {
+        word-break: break-word;
+      }
+      .message.sent {
+        background-color: #e3f2fd;
+        margin-left: 20%;
+        text-align: right;
+      }
+      .message.received {
+        background-color: #f5f5f5;
+        margin-right: 20%;
+        text-align: left;
+      }
+      .message.recalled {
+        opacity: 0.7;
+        font-style: italic;
+      }
+      .message.recalled .message-content {
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Group Chat Test</h1>
+
+    <div class="input-group">
+      <input type="text" id="tokenInput" placeholder="Enter JWT Token" />
+      <button onclick="connectSocket()">Connect</button>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="groupId" placeholder="Group ID" />
+      <button onclick="joinGroup()">Join Group</button>
+      <button onclick="leaveGroup()">Leave Group</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <div class="input-group">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div id="typingIndicator"></div>
+
+    <script>
+      let socket = null;
+      const messagesDiv = document.getElementById("messages");
+      const messageInput = document.getElementById("messageInput");
+      const typingIndicator = document.getElementById("typingIndicator");
+      let currentGroupId = null;
+      let messages = new Map(); // Lưu trữ tin nhắn theo messageId
+      let currentUserId = null; // Thêm biến để lưu userId
+
+      function connectSocket() {
+        const token = document.getElementById("tokenInput").value.trim();
+        if (!token) {
+          alert("Please enter a valid JWT token");
+          return;
+        }
+
+        // Lấy userId từ token
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          currentUserId = payload.userId;
+          console.log("Current user ID:", currentUserId);
+        } catch (error) {
+          console.error("Error parsing token:", error);
+          alert("Invalid token format");
+          return;
+        }
+
+        // Disconnect existing socket if any
+        if (socket) {
+          socket.disconnect();
+        }
+
+        // Create new socket connection
+        socket = io("http://localhost:3000", {
+          auth: {
+            token: token,
+          },
+        });
+
+        // Socket event handlers
+        socket.on("connect", () => {
+          console.log("Connected to server");
+          appendMessage({
+            content: "Connected to server",
+            type: "system",
+          });
+        });
+
+        socket.on("connect_error", (error) => {
+          console.error("Connection error:", error);
+          appendMessage({
+            content: `Connection error: ${error.message}`,
+            type: "error",
+          });
+        });
+
+        socket.on("disconnect", () => {
+          console.log("Disconnected from server");
+          appendMessage({
+            content: "Disconnected from server",
+            type: "system",
+          });
+        });
+
+        socket.on("new-group-message", (message) => {
+          console.log("Received new message:", message);
+
+          // Nếu là tin nhắn tạm thời, bỏ qua
+          if (message.groupMessageId.startsWith("temp-")) {
+            return;
+          }
+
+          // Chỉ hiển thị tin nhắn từ người khác
+          if (message.senderId !== currentUserId) {
+            // Xóa tin nhắn tạm thời nếu có
+            const tempMessages = document.querySelectorAll(
+              '[id^="message-temp-"]'
+            );
+            tempMessages.forEach((el) => el.remove());
+
+            appendMessage({
+              ...message,
+              type: "received",
+            });
+          }
+        });
+
+        socket.on("message-sent", (response) => {
+          console.log("Message sent confirmation:", response);
+          if (response.status === "success") {
+            // Xóa tin nhắn tạm thời
+            const tempMessages = document.querySelectorAll(
+              '[id^="message-temp-"]'
+            );
+            tempMessages.forEach((el) => el.remove());
+
+            // Hiển thị tin nhắn thật
+            appendMessage({
+              ...response.message,
+              type: "sent",
+            });
+          }
+        });
+
+        socket.on("group-history", (data) => {
+          console.log("Received group history:", data);
+          // Xóa tin nhắn cũ
+          messagesDiv.innerHTML = "";
+
+          // Hiển thị tin nhắn từ lịch sử
+          if (data.messages && Array.isArray(data.messages)) {
+            data.messages.forEach((message) => {
+              const messageType =
+                message.senderId === currentUserId ? "sent" : "received";
+              appendMessage({
+                ...message,
+                type: messageType,
+              });
+            });
+          }
+        });
+
+        socket.on("user-joined", (data) => {
+          console.log("User joined:", data);
+          appendMessage({
+            content: `${data.metadata.name || data.userId} joined the group`,
+            type: "system",
+          });
+        });
+
+        socket.on("error", (error) => {
+          console.error("Socket error:", error);
+          appendMessage({
+            content: error.message,
+            type: "error",
+          });
+        });
+
+        socket.on("group-message-recalled", (data) => {
+          console.log("Message recalled:", data);
+          const messageElement = document.getElementById(
+            `message-${data.messageId}`
+          );
+          if (messageElement) {
+            messageElement.querySelector(".message-content").textContent =
+              "Tin nhắn đã bị thu hồi";
+            messageElement.classList.add("recalled");
+
+            // Xóa các nút hành động
+            const actionsDiv = messageElement.querySelector(".message-actions");
+            if (actionsDiv) {
+              actionsDiv.remove();
+            }
+          }
+        });
+      }
+
+      function joinGroup() {
+        if (!socket || !socket.connected) {
+          alert("Please connect to server first");
+          return;
+        }
+
+        const groupId = document.getElementById("groupId").value;
+        if (groupId) {
+          currentGroupId = groupId;
+          socket.emit("join-group", groupId);
+          console.log("Emitting join-group for:", groupId); // Debug log
+          appendMessage({
+            content: `Joined group ${groupId}`,
+            type: "system",
+          });
+
+          // Fetch existing messages
+          const token = document.getElementById("tokenInput").value.trim();
+          fetch(`http://localhost:3000/api/chat-group/${groupId}/messages`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                // Hiển thị tin nhắn cũ
+                Object.values(data.data.messages)
+                  .flat()
+                  .forEach((message) => {
+                    const messageType =
+                      message.senderId === currentUserId ? "sent" : "received";
+                    appendMessage({
+                      ...message,
+                      type: messageType,
+                    });
+                  });
+              }
+            })
+            .catch((error) => console.error("Error fetching messages:", error));
+        }
+      }
+
+      function leaveGroup() {
+        if (!socket || !socket.connected) {
+          alert("Please connect to server first");
+          return;
+        }
+
+        if (currentGroupId) {
+          socket.emit("leave-group", currentGroupId);
+          appendMessage({
+            content: `Left group ${currentGroupId}`,
+            type: "system",
+          });
+          currentGroupId = null;
+        }
+      }
+
+      function sendMessage() {
+        if (!socket || !socket.connected) {
+          alert("Please connect to server first");
+          return;
+        }
+
+        if (!currentGroupId) {
+          alert("Please join a group first");
+          return;
+        }
+
+        const content = messageInput.value.trim();
+        if (content) {
+          try {
+            // Hiển thị tin nhắn tạm thời
+            const tempMessage = {
+              groupMessageId: `temp-${Date.now()}`,
+              content,
+              senderId: currentUserId,
+              createdAt: new Date().toISOString(),
+              metadata: {},
+              type: "sent",
+            };
+            appendMessage(tempMessage);
+
+            // Gửi tin nhắn qua socket
+            socket.emit("send-group-message", {
+              groupId: currentGroupId,
+              content,
+            });
+
+            messageInput.value = "";
+          } catch (error) {
+            console.error("Error sending message:", error);
+            appendMessage({
+              content: `Error: ${error.message}`,
+              type: "error",
+            });
+          }
+        }
+      }
+
+      function deleteMessage(messageId) {
+        if (!socket || !socket.connected) {
+          alert("Please connect to server first");
+          return;
+        }
+
+        if (!currentGroupId) {
+          alert("Please join a group first");
+          return;
+        }
+
+        // Gửi yêu cầu xóa qua socket
+        socket.emit("delete-group-message", {
+          groupId: currentGroupId,
+          messageId,
+        });
+      }
+
+      function recallMessage(messageId) {
+        if (!socket || !socket.connected) {
+          alert("Please connect to server first");
+          return;
+        }
+
+        if (!currentGroupId) {
+          alert("Please join a group first");
+          return;
+        }
+
+        // Gửi yêu cầu thu hồi qua socket
+        socket.emit("recall-group-message", {
+          groupId: currentGroupId,
+          messageId,
+        });
+      }
+
+      messageInput.addEventListener("input", () => {
+        if (socket && socket.connected && currentGroupId) {
+          socket.emit("typing-group", currentGroupId);
+        }
+      });
+
+      messageInput.addEventListener("blur", () => {
+        if (socket && socket.connected && currentGroupId) {
+          socket.emit("stop-typing-group", currentGroupId);
+        }
+      });
+
+      function appendMessage(message) {
+        if (!message.createdAt) {
+          message.createdAt = new Date().toISOString();
+        }
+
+        const messageDiv = document.createElement("div");
+        messageDiv.id = `message-${message.groupMessageId || Date.now()}`;
+        messageDiv.className = `message ${message.type}`;
+
+        const isCurrentUser = message.senderId === currentUserId;
+        const senderName = isCurrentUser
+          ? "You"
+          : message.metadata?.senderName || message.senderId;
+
+        console.log("Appending message:", {
+          senderId: message.senderId,
+          currentUserId,
+          isCurrentUser,
+          senderName,
+        }); // Debug log
+
+        let content = `
+          <div class="message-header">
+            <strong>${senderName}</strong>
+            <small>${new Date(message.createdAt).toLocaleTimeString()}</small>
+          </div>
+          <div class="message-content">${message.content}</div>
+        `;
+
+        if (
+          message.type === "sent" &&
+          !message.groupMessageId?.startsWith("temp-")
+        ) {
+          content += `
+            <div class="message-actions">
+              <button onclick="recallMessage('${message.groupMessageId}')">Recall</button>
+              <button onclick="deleteMessage('${message.groupMessageId}')">Delete</button>
+            </div>
+          `;
+        }
+
+        messageDiv.innerHTML = content;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

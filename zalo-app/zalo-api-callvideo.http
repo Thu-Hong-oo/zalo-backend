@@ -1,0 +1,28 @@
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ4NDE5MDc0LCJleHAiOjE3NDg1MDU0NzR9.Om4DkO7Q0elZ0_UJFajsgwKAvRYTkKUbaXmj2bomGBg
+@callId = 981e52a8-889c-4ff6-be0d-bbe2cabb1b1f
+
+### Tạo phòng video call
+POST http://localhost:3000/api/video-call/room
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "roomName": "test_room_4679000000"
+}
+
+### Lấy Twilio Access Token cho video call
+POST http://localhost:3000/api/video-call/token
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "identity": "user_1717000000"
+}
+
+### Lấy lịch sử cuộc gọi video
+GET http://localhost:3000/api/video-call/history
+Authorization: Bearer {{authToken}}
+
+### Lấy thông tin chi tiết 1 cuộc gọi video (thay {{callId}})
+GET http://localhost:3000/api/video-call/stats/{{callId}}
+Authorization: Bearer {{authToken}}

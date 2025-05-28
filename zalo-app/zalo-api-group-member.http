@@ -1,0 +1,78 @@
+
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ1OTE1MzQ1LCJleHAiOjE3NDYwMDE3NDV9.li3_v-dATEOhb1h2mRxtogwNmPxWqt6y86wT05bncwU
+@group_id = 35b99f4a-bf8d-456a-97aa-0368004b2be9
+
+@user_id = 346f45cb-af42-4f2d-9b15-eb7aa29e4b86
+@member_id = 123
+
+GET http://localhost:3000/api/users/recent-contacts
+Authorization: Bearer {{authToken}}
+
+### Create group
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "members": [
+    "463850a1-75ba-4f09-bf7e-c0ca62b0ea18",
+    "b6b1463f-ec88-4232-bcca-dc4e294cefe4",
+    "554d27e4-eeca-469a-a87c-9f208a0533e4",
+    "eb6cab14-054b-4ab3-8e69-21b394ff75fd"
+  ],
+  "createdBy": "463850a1-75ba-4f09-bf7e-c0ca62b0ea18",
+  "name": "Tesst hiện tin nhắn mới nhất"
+}
+
+### Update group info
+PUT http://localhost:3000/api/groups/{{group_id}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "tin nhắn mơi nhat",
+ "lastMessage":"không biết"
+}
+
+### Get group by ID
+GET http://localhost:3000/api/groups/{{group_id}}
+Authorization: Bearer {{authToken}}
+
+### Delete group
+DELETE http://localhost:3000/api/groups/d8a5f5b9-ea1f-47cf-a1fd-b5ce9742fdc9
+Authorization: Bearer {{authToken}}
+
+### Add member
+POST http://localhost:3000/api/groups/{{group_id}}/members
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "userId": "346f45cb-af42-4f2d-9b15-eb7aa29e4b86",
+  "role": "MEMBER"
+}
+
+### Get members
+GET http://localhost:3000/api/groups/{{group_id}}/members
+Authorization: Bearer {{authToken}}
+
+### Update member role
+PUT http://localhost:3000/api/groups/{{group_id}}/members/{{user_id}}/role
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "role": "MEMBER"
+}
+
+### Remove member
+DELETE http://localhost:3000/api/groups/{{group_id}}/members/{{user_id}}
+Authorization: Bearer {{authToken}}
+
+### Get user's groups
+GET http://localhost:3000/api/users/463850a1-75ba-4f09-bf7e-c0ca62b0ea18/groups
+Authorization: Bearer {{authToken}}
+
+### Update last read
+PUT http://localhost:3000/api/groups/{{group_id}}/members/{{user_id}}/last-read
+Authorization: Bearer {{authToken}} 

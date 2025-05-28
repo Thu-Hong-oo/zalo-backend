@@ -1,0 +1,290 @@
+### ========== ĐĂNG KÝ ==========
+
+### 1. Gửi OTP đăng ký
+POST http://localhost:3000/api/auth/register/send-otp
+Content-Type: application/json
+
+{
+    "phone": "0376963653"
+}
+
+### 2. Xác thực OTP đăng ký
+POST http://localhost:3000/api/auth/register/verify-otp
+Content-Type: application/json
+
+{
+    "phone": "0376963653",
+    "otp": "629549"
+}
+
+### 3. Hoàn tất đăng ký
+POST http://localhost:3000/api/auth/register/complete
+Content-Type: application/json
+
+{
+    "phone": "0987654321",
+    "name": "Tôi chỉ là người test Group API",
+    "password": "123456"
+}
+
+### ========== ĐĂNG NHẬP/ĐĂNG XUẤT ==========
+
+### Đăng nhập
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0123456789",
+    "password": "123456"
+}
+
+### Làm mới token
+POST http://localhost:3000/api/auth/refresh-token
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0MjMzOTY2LCJleHAiOjE3NDQ4Mzg3NjZ9.iJhlP5Pe3Mu0Tq8CNfsjuE-41uiciQNszRVInquzdfM"
+}
+
+### Đăng xuất
+POST http://localhost:3000/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjU4IiwiaWF0IjoxNzQ0NjAzMDc0LCJleHAiOjE3NDQ2ODk0NzR9.Ox2lWaPK1rrTY3qYUKEQ34_TCs2hU3A2qxoZB4aacSc
+Content-Type: application/json
+
+### ========== QUÊN MẬT KHẨU ==========
+
+### 1. Gửi OTP quên mật khẩu
+POST http://localhost:3000/api/auth/forgot-password/send-otp
+Content-Type: application/json
+
+{
+    "phone": "0376963653"
+}
+
+### 2. Xác thực OTP quên mật khẩu
+POST http://localhost:3000/api/auth/forgot-password/verify-otp
+Content-Type: application/json
+
+{
+    "phone": "0376963653",
+    "otp": "766661"
+}
+
+### 3. Đặt lại mật khẩu
+POST http://localhost:3000/api/auth/forgot-password/reset
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjE4Mzg3LCJleHAiOjE3NDQ3MDQ3ODd9.9EcRF5Rf7eEs4Gt0pc1bwqC0F3R6eaRxJmLDEvbDsjg
+Content-Type: application/json
+
+{
+    "newPassword": "1234567"
+}
+
+### ========== QUẢN LÝ TÀI KHOẢN ==========
+
+### Lấy thông tin profile
+GET http://localhost:3000/api/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0MjM0MjQ4LCJleHAiOjE3NDQzMjA2NDh9.njkenA1oyOH6rknkRm42FTx9v_PBpQ5ZTi4rrPHO8l8
+
+### Cập nhật profile
+PUT http://localhost:3000/api/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "name": "Tên Mới",
+    "status": "online"
+}
+
+### Đổi mật khẩu
+PUT http://localhost:3000/api/users/password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjE5NDc5LCJleHAiOjE3NDQ3MDU4Nzl9.JIrL70bAwJjz69-1iPinJNQXOuiSvk8DkCyEnmMGg9E
+Content-Type: application/json
+
+{
+    "currentPassword": "12345678",
+    "newPassword": "123456"
+}
+
+### Gửi lại OTP
+POST http://localhost:3000/api/auth/resend-otp
+Content-Type: application/json
+
+{
+    "phone": "0376963653"
+}
+
+### ========== TÌM KIẾM NGƯỜI DÙNG ==========
+
+### Tìm kiếm người dùng
+GET http://localhost:3000/api/users/search?query=nguyenvana
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0MjM0MjQ4LCJleHAiOjE3NDQzMjA2NDh9.njkenA1oyOH6rknkRm42FTx9v_PBpQ5ZTi4rrPHO8l8
+
+### Lấy thông tin người dùng theo số điện thoại
+GET http://localhost:3000/api/users/84389804287
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ1OTE1MzQ1LCJleHAiOjE3NDYwMDE3NDV9.li3_v-dATEOhb1h2mRxtogwNmPxWqt6y86wT05bncwU
+
+### ========== TIN NHẮN ==========
+
+### Gửi tin nhắn văn bản
+POST http://localhost:3000/api/message/send
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjgwNjU2LCJleHAiOjE3NDQ3NjcwNTZ9.l_EW338cI38JSR3L6RwK6gNyQ_wpCX6j1HiroPMhWas
+Content-Type: application/json
+
+{
+    "from": "84389804287",
+    "to": "84376963653",
+    "message": "test tin nhắn chưa đọc",
+    "type": "text"
+}
+
+### Gửi emoji
+POST http://localhost:3000/api/message/send
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "from": "84376963653",
+    "to": "84376963651",
+    "message": "😊",
+    "type": "emoji"
+}
+
+### Gửi file
+POST http://localhost:3000/api/message/send-file
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="from"
+
+84376963653
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="to"
+
+84376963651
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="test.txt"
+Content-Type: text/plain
+
+< ./test.txt
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Thu hồi tin nhắn
+POST http://localhost:3000/api/message/recall
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "chatId": "84376963651_84376963653",
+    "messageId": "93eb7845-a869-45af-9781-79d363fea996",
+    "userId": "84376963653"
+}
+
+### Xóa tin nhắn (chỉ xóa ở phía người dùng)
+DELETE http://localhost:3000/api/message/delete
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "chatId": "84376963651_84376963653",
+    "messageId": "73df087c-6505-451d-9bcc-4276312e3e7e",
+    "userId": "84376963653"
+}
+
+### Chuyển tiếp tin nhắn
+POST http://localhost:3000/api/message/forward
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "messageId": "0293c16e-f9f9-4281-a11a-1c73be37e771",
+    "from": "84376963653",
+    "to": "84376963651",
+    "originalChatId": "84376963653_84389804287"
+}
+
+### Lấy danh sách tin nhắn
+GET http://localhost:3000/api/message/get?userA=84376963653&userB=84376963651&limit=20
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+
+### Đánh dấu đã đọc tin nhắn
+POST http://localhost:3000/api/message/mark-read
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "chatId": "84376963651_84376963653",
+    "messageIds": ["cdd10e35-8fea-4ca3-80e8-a02452f4615e", "1045eb76-a302-40be-8f6c-e9fdebb91679"],
+    "userId": "84376963653"
+}
+
+### Lấy tin nhắn chưa đọc
+GET http://localhost:3000/api/message/unread?userId=84389804287
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ0NjA3OTg1LCJleHAiOjE3NDQ2OTQzODV9.cWJ0ty80BIhjivSpu3rxtSFmM56dQmBcZuOC4hwxC2o
+
+
+### ========== BẠN BÈ ==========
+
+### Gửi lời mời kết bạn
+POST http://localhost:3000/api/friend/request
+Authorization: Bearer your_access_token_here
+Content-Type: application/json
+
+{
+    "from": "84376963653",
+    "to": "84376961111"
+}
+
+### Xem danh sách lời mời đã gửi
+GET http://localhost:3000/api/friend/request/sent/84376963653
+Authorization: Bearer your_access_token_here
+
+### Xem danh sách lời mời đã nhận
+GET http://localhost:3000/api/friend/request/received/84376963653
+Authorization: Bearer your_access_token_here
+
+### Chấp nhận lời mời kết bạn
+POST http://localhost:3000/api/friend/request/accept
+Authorization: Bearer your_access_token_here
+Content-Type: application/json
+
+{
+    "requestId": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+### Từ chối lời mời kết bạn
+POST http://localhost:3000/api/friend/request/reject
+Authorization: Bearer your_access_token_here
+Content-Type: application/json
+
+{
+    "requestId": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+### Hủy lời mời kết bạn
+POST http://localhost:3000/api/friend/request/cancel
+Authorization: Bearer your_access_token_here
+Content-Type: application/json
+
+{
+    "requestId": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+### Xem danh sách bạn bè
+GET http://localhost:3000/api/friend/list/84376963653
+Authorization: Bearer your_access_token_here
+
+### ========== THIẾT LẬP KẾT NỐI CHAT ==========
+
+### Kiểm tra trạng thái kết nối
+GET http://localhost:3000/api/chat/connection-status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+
+### Thiết lập kết nối chat
+POST http://localhost:3000/api/chat/establish-connection
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0Mzc2OTYzNjUzIiwiaWF0IjoxNzQ0NjA0ODY1LCJleHAiOjE3NDQ2OTEyNjV9.APBoA9Hnx0hvFWpdR_fF_viyghBC9F4wsCpmNc8iN6s
+Content-Type: application/json
+
+{
+    "userId": "84376963653"
+}

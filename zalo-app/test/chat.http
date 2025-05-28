@@ -1,0 +1,66 @@
+### Đăng nhập Vân ở đây
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0389804287",
+    "password": "123456"
+}
+
+### Đăng nhập
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0123456789",
+    "password": "123456"
+}
+
+
+### Lấy thông tin người dùng theo số điện thoại
+GET http://localhost:3000/api/users/84389804287
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MTQyMzE0LCJleHAiOjE3NDUyMjg3MTR9.r-K_saAYoVcWXQadddoDf2cNJfMA5EjDi_g36U9vE8w
+
+### Lấy lịch sử chat với 1 người Vân ở đây to nguyenvan
+GET http://localhost:3000/api/chat/history/84123456789
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MDQ3NjIyLCJleHAiOjE3NDUxMzQwMjJ9.U6jxKyAyX3kypJIBbT6L9S4Oc_HZsLF38l2eNK3aqJk
+
+### Lấy lịch sử chat với 1 người nguyenvan to Vân ở đây
+GET http://localhost:3000/api/chat/history/84376963653
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ4NDI1MTY2LCJleHAiOjE3NDg1MTE1NjZ9.06rWSVoNqSqZG8P0YjIQnFfJSiNjYgJz7AkfwR4l2bQ
+
+### lấy danh sách cuộc trò chuyện của người dùng đang đăng nhập
+GET http://localhost:3000/api/chat/conversations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ0NjQ0NjIyLCJleHAiOjE3NDQ3MzEwMjJ9.qz31ORZzy5MhBRPaaoAPj3tyC9GX82DiT-cdaCgqCn4
+
+// PHẦN TẠO TIN NHẮN SẼ ĐƯỢC LÀM Ở SOCKET-TEST.HTML
+
+### Thu hồi tin nhắn
+PUT http://localhost:3000/api/chat/messages/recall
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ0NjQ0NjIyLCJleHAiOjE3NDQ3MzEwMjJ9.qz31ORZzy5MhBRPaaoAPj3tyC9GX82DiT-cdaCgqCn4
+
+{
+    "messageId": "5133f811-9ab7-498b-a244-d3ab04c683f0",
+    "receiverPhone": "84389804287"
+}
+
+### Chuyển tiếp tin nhắn
+POST http://localhost:3000/api/chat/messages/forward
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ0NjQ0NjIyLCJleHAiOjE3NDQ3MzEwMjJ9.qz31ORZzy5MhBRPaaoAPj3tyC9GX82DiT-cdaCgqCn4
+
+{
+    "messageId": "b00c5d02-51dc-4d63-9c47-cf0e4a3e0725",
+    "receiverPhone": "84376963653",
+    "content": "hohoo"
+}
+
+### Xóa tin nhắn (chỉ xóa ở phía người dùng hiện tại)
+DELETE http://localhost:3000/api/chat/messages/delete
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ0NjQ0NjIyLCJleHAiOjE3NDQ3MzEwMjJ9.qz31ORZzy5MhBRPaaoAPj3tyC9GX82DiT-cdaCgqCn4
+
+{
+    "messageId": "53b92531-f303-43cf-ba77-9cf6787d3151"
+}

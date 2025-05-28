@@ -1,0 +1,85 @@
+###Get user info by userid
+GET http://localhost:3000/api/users/byId/554d27e4-eeca-469a-a87c-9f208a0533e4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MzMxNTAzLCJleHAiOjE3NDU0MTc5MDN9.vJrbMp83osQuwB9ia1E5bwCUOJa9CtV2DQIlQ81t-6s
+### Get user's groups Vân ở đây
+GET http://localhost:3000/api/users/554d27e4-eeca-469a-a87c-9f208a0533e4/groups
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MzMxNTAzLCJleHAiOjE3NDU0MTc5MDN9.vJrbMp83osQuwB9ia1E5bwCUOJa9CtV2DQIlQ81t-6s
+
+### Get Group Messages với date
+GET http://localhost:3000/api/chat-group/29223937-60fc-47cf-8afe-f09d8dd49795/messages?date=2025-04-21
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MTQyMzE0LCJleHAiOjE3NDUyMjg3MTR9.r-K_saAYoVcWXQadddoDf2cNJfMA5EjDi_g36U9vE8w
+Content-Type: application/json
+
+### Get Group Messages
+GET http://localhost:3000/api/chat-group/29223937-60fc-47cf-8afe-f09d8dd49795/messages
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MjMwNTczLCJleHAiOjE3NDUzMTY5NzN9.xRuejlgltQR7VXnJElU-thCYI7EUTvS_00E5GbNKeWg
+Content-Type: application/json
+
+### Send Group Message 
+POST http://localhost:3000/api/chat-group/29223937-60fc-47cf-8afe-f09d8dd49795/messages
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MjMwNTczLCJleHAiOjE3NDUzMTY5NzN9.xRuejlgltQR7VXnJElU-thCYI7EUTvS_00E5GbNKeWg
+Content-Type: application/json
+
+{
+  "content": "thu hồi jbjhftukkli",
+  "fileUrl": null,
+  "fileType": null
+}
+
+### Delete Group Message by Vân ở đây( groupid, messageid)
+DELETE http://localhost:3000/api/chat-group/29223937-60fc-47cf-8afe-f09d8dd49795/messages/712ef912-f68e-4e55-8d9c-d2078ef19ee0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MTQyMzE0LCJleHAiOjE3NDUyMjg3MTR9.r-K_saAYoVcWXQadddoDf2cNJfMA5EjDi_g36U9vE8w
+Content-Type: application/json 
+
+### Recall Message (groupid, messageid)
+PUT http://localhost:3000/api/chat-group/29223937-60fc-47cf-8afe-f09d8dd49795/messages/33de1608-102c-483f-b707-131171e29cd2/recall
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MjMwNTczLCJleHAiOjE3NDUzMTY5NzN9.xRuejlgltQR7VXnJElU-thCYI7EUTvS_00E5GbNKeWg
+
+### Đăng nhập Vân ở đây
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0389804287",
+    "password": "123456"
+}
+
+### Đăng nhập Thu hồng
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0376963653",
+    "password": "123456"
+}
+
+### Đăng nhập Nguyễn Vân
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "phone": "0123456789",
+    "password": "123456"
+}
+
+### Forward Message from Group to Group
+POST http://localhost:3000/api/chat-group/6dcd4dd3-6da2-4c90-8a60-3b029b5d8c17/messages/forward
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ1MzMzMTQyLCJleHAiOjE3NDU0MTk1NDJ9.tXay7Pte3LhIE-yB_5lr1ydMQ9MjiOhClhu2SbWsIhw
+Content-Type: application/json
+
+{
+  "sourceMessageId": "07597595-ebc5-48aa-b00e-9e252c25390a",
+  "targetId": "7921fff7-97b6-4be5-89a4-e530b44d611a",
+  "targetType": "group"
+}
+
+### Forward Message from Group to Conversation
+POST http://localhost:3000/api/chat-group/6dcd4dd3-6da2-4c90-8a60-3b029b5d8c17/messages/forward
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MTQyMzE0LCJleHAiOjE3NDUyMjg3MTR9.r-K_saAYoVcWXQadddoDf2cNJfMA5EjDi_g36U9vE8w
+Content-Type: application/json
+
+{
+  "sourceMessageId": "07597595-ebc5-48aa-b00e-9e252c25390a",
+  "targetId": "0123456789",
+  "targetType": "conversation"
+}

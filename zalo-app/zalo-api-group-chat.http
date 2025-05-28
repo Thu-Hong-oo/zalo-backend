@@ -1,0 +1,37 @@
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NTRkMjdlNC1lZWNhLTQ2OWEtYTg3Yy05ZjIwOGEwNTMzZTQiLCJwaG9uZSI6Ijg0Mzg5ODA0Mjg3IiwiaWF0IjoxNzQ1MTQyMzE0LCJleHAiOjE3NDUyMjg3MTR9.r-K_saAYoVcWXQadddoDf2cNJfMA5EjDi_g36U9vE8w
+@group_id = bfcefcc6-771e-4542-a2e5-7bb4dcfdd78b
+@message_id = 123
+
+### Get group messages
+GET http://localhost:3000/api/chat-group/{{group_id}}/messages?limit=20&before=true
+Authorization: Bearer {{authToken}}
+
+### Get group messages with pagination
+GET http://localhost:3000/api/chat-group/{{group_id}}/messages?limit=20&before=true&lastEvaluatedKey=eyJncm91cElkIjoiYmZjZWZjYzYtNzcxZS00NTQyLWEyZTUtN2JiNGRjZmRkNzhiIiwiY3JlYXRlZEF0IjoiMjAyNC0wNC0yMFQwODowMDowMC4wMDBaIn0=
+Authorization: Bearer {{authToken}}
+
+### Send text message
+POST http://localhost:3000/api/chat-group/{{group_id}}/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "content": "Hello group!",
+  "fileUrl": null,
+  "fileType": null
+}
+
+### Send file message
+POST http://localhost:3000/api/chat-group/{{group_id}}/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "content": null,
+  "fileUrl": "https://example.com/file.jpg",
+  "fileType": "image/jpeg"
+}
+
+### Delete message
+DELETE http://localhost:3000/api/chat-group/{{group_id}}/messages/{{message_id}}
+Authorization: Bearer {{authToken}} 

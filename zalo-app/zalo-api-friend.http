@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:3000/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjZjYWIxNC0wNTRiLTRhYjMtOGU2OS0yMWIzOTRmZjc1ZmQiLCJwaG9uZSI6Ijg0MTIzNDU2Nzg5IiwiaWF0IjoxNzQ1MjI2ODA2LCJleHAiOjE3NDUzMTMyMDZ9.lcl7rtZj7I6IIrfYiiL4D05Hof9Zw_0ghRpj20e7NUA
+
+### Gửi lời mời kết bạn
+POST {{baseUrl}}/friends/request
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "from": "eb6cab14-054b-4ab3-8e69-21b394ff75fd",
+    "to": "463850a1-75ba-4f09-bf7e-c0ca62b0ea18"
+}
+
+### Lấy danh sách lời mời đã gửi
+GET {{baseUrl}}/friends/request/sent/eb6cab14-054b-4ab3-8e69-21b394ff75fd
+Authorization: Bearer {{authToken}}
+
+### Lấy danh sách lời mời đã nhận
+GET {{baseUrl}}/friends/request/received/346f45cb-af42-4f2d-9b15-eb7aa29e4b86
+Authorization: Bearer {{authToken}}
+
+### Chấp nhận lời mời kết bạn
+POST {{baseUrl}}/friends/request/accept
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "requestId": "1a3333ae-b90b-41cb-a828-3ae7d4dd697f"
+}
+
+### Từ chối lời mời kết bạn
+POST {{baseUrl}}/friends/request/reject
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "requestId": "request_id_here"
+}
+
+### Hủy lời mời kết bạn đã gửi
+POST {{baseUrl}}/friends/request/cancel
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "requestId": "request_id_here"
+}
+
+### Lấy danh sách bạn bè
+GET {{baseUrl}}/friends/list/eb6cab14-054b-4ab3-8e69-21b394ff75fd
+Authorization: Bearer {{authToken}} 
