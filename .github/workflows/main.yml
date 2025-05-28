@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ develop ]
 
 jobs:
   build-and-test:
@@ -37,12 +37,13 @@ jobs:
         script: |
           cd /home/ec2-user/zalo-backend
           git pull origin main
+          echo "${{ secrets.ENV_FILE }}" > .env
           docker build -t zalo-backend .
           docker stop zalo-backend || true
           docker rm zalo-backend || true
           docker run -d \
             --name zalo-backend \
             --restart unless-stopped \
+            --env-file .env \
             -p 3000:3000 \
-            -e NODE_ENV=production \
-            zalo-backend 
+            zalo-backend
