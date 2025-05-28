@@ -35,8 +35,16 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd /home/ec2-user/zalo-backend
-          git pull origin main --rebase
+          if [ -d "/home/ec2-user/zalo-backend" ]; then
+            cd /home/ec2-user/zalo-backend
+            git reset --hard
+            git clean -fd
+            git pull origin main --rebase
+          else
+            git clone https://github.com/Thu-Hong-oo/zalo-backend.git /home/ec2-user/zalo-backend
+            cd /home/ec2-user/zalo-backend
+          fi
+
           echo "${{ secrets.ENV_FILE }}" > .env
           docker build -t zalo-backend .
           docker stop zalo-backend || true
