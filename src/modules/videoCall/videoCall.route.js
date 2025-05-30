@@ -37,7 +37,9 @@ const generateAccessToken = async (req, res) => {
       status: 'success',
       data: {
         token: token.toJwt(),
-        identity: identity || userPhone
+        identity: identity || userPhone,
+        name: req.user.name || userPhone,
+        avatar: req.user.avatar || ''
       }
     });
   } catch (error) {
@@ -289,6 +291,7 @@ const initializeVideoSocket = (io, connectedUsers) => {
     }
     // Video call invitation
     socket.on('video-call-invite', async (data) => {
+      console.log('video-call-invite socket.user:', socket.user);
       try {
         const { receiverPhone, roomName, callType = 'video' } = data;
         const senderPhone = socket.user.phone;
@@ -298,6 +301,19 @@ const initializeVideoSocket = (io, connectedUsers) => {
           socket.emit('call-error', { message: 'Thiếu thông tin người gọi hoặc người nhận' });
           return;
         }
+
+        // Lấy thông tin người gọi từ database sử dụng phone-index
+        const userResult = await dynamoDB.query({
+          TableName: process.env.USER_TABLE,
+          IndexName: 'phone-index',
+          KeyConditionExpression: 'phone = :phone',
+          ExpressionAttributeValues: {
+            ':phone': senderPhone
+          }
+        }).promise();
+
+        const senderName = userResult.Items[0]?.name || senderPhone;
+        const senderAvatar = userResult.Items[0]?.avatar || '';
 
         // Create call record
         const callId = uuidv4();
@@ -325,19 +341,35 @@ const initializeVideoSocket = (io, connectedUsers) => {
         // Send invitation to receiver
         const receiverSocket = connectedUsers.get(receiverPhone);
         if (receiverSocket) {
+          console.log('Emit incoming-video-call:', {
+            callId,
+            senderPhone,
+            roomName,
+            callType,
+            senderName,
+            senderAvatar,
+          });
+          
           receiverSocket.emit('incoming-video-call', {
             callId,
             senderPhone,
             roomName,
-            callType
+            callType,
+            senderName,
+            senderAvatar,
           });
         }
 
-        // Send confirmation to sender
-        socket.emit('call-invitation-sent', { callId, status: 'sent' });
+        // Send confirmation to sender with user info
+        socket.emit('call-invitation-sent', { 
+          callId, 
+          status: 'sent',
+          name: senderName,
+          avatar: senderAvatar
+        });
 
         // Gửi message thông báo bắt đầu cuộc gọi
-        await sendCallMessageIfNotExists({
+        await sendCallMessage({
           conversationId: [senderPhone, receiverPhone].sort().join('_'),
           senderPhone,
           receiverPhone,
@@ -372,7 +404,7 @@ const initializeVideoSocket = (io, connectedUsers) => {
               }
 
               // Gửi message thông báo nhỡ cuộc gọi
-              await sendCallMessageIfNotExists({
+              await sendCallMessage({
                 conversationId: [senderPhone, receiverPhone].sort().join('_'),
                 senderPhone,
                 receiverPhone,
@@ -475,7 +507,7 @@ const initializeVideoSocket = (io, connectedUsers) => {
         }
 
         // Gửi message thông báo từ chối cuộc gọi
-        await sendCallMessageIfNotExists({
+        await sendCallMessage({
           conversationId: [senderPhone, receiverPhone].sort().join('_'),
           senderPhone,
           receiverPhone,
@@ -535,7 +567,7 @@ const initializeVideoSocket = (io, connectedUsers) => {
         }
 
         // Gửi message thông báo kết thúc cuộc gọi
-        await sendCallMessageIfNotExists({
+        await sendCallMessage({
           conversationId: [userPhone, otherPhone].sort().join('_'),
           senderPhone: userPhone,
           receiverPhone: otherPhone,
@@ -609,7 +641,7 @@ const updateCallStatus = async (req, res) => {
       const result = await dynamoDB.query(params).promise();
       const existed = result.Items && result.Items.some(m => m.callStatus === status && m.callId === callId);
       if (!existed) {
-        await sendCallMessageIfNotExists({
+        await sendCallMessage({
           conversationId,
           senderPhone,
           receiverPhone,
@@ -628,21 +660,6 @@ const updateCallStatus = async (req, res) => {
   } catch (err) {
     console.error('Error updating call status:', err);
     res.status(500).json({ status: 'error', message: 'Không thể cập nhật trạng thái cuộc gọi' });
-  }
-};
-
-const sendCallMessageIfNotExists = async ({ conversationId, senderPhone, receiverPhone, status, duration, type, callId }) => {
-  // Kiểm tra đã có message call với callId và status này chưa
-  const params = {
-    TableName: process.env.MESSAGE_TABLE,
-    IndexName: 'conversationIndex',
-    KeyConditionExpression: 'conversationId = :conversationId',
-    ExpressionAttributeValues: { ':conversationId': conversationId },
-  };
-  const result = await dynamoDB.query(params).promise();
-  const existed = result.Items && result.Items.some(m => m.callId === callId && m.callStatus === status);
-  if (!existed) {
-    await sendCallMessage({ conversationId, senderPhone, receiverPhone, status, duration, type, callId });
   }
 };
 

@@ -797,7 +797,7 @@ const sendCallMessage = async ({ conversationId, senderPhone, receiverPhone, sta
         content = 'Cuộc gọi bị từ chối';
         break;
       default:
-        content = `Cuộc gọi video: ${status}`;
+        content = `Cuộc gọi video đã bị hủy`;
     }
 
     const messageId = uuidv4();
@@ -818,7 +818,43 @@ const sendCallMessage = async ({ conversationId, senderPhone, receiverPhone, sta
       }
     };
 
-    await dynamoDB.put(messageParams).promise();
+    // Nếu là message call, chỉ cho phép tạo 1 bản ghi với cùng conversationId, callId, callStatus
+    if (callId && status) {
+      // Check duplicate trước khi tạo
+      const existingCheck = await dynamoDB.query({
+        TableName: process.env.MESSAGE_TABLE,
+        IndexName: 'conversationIndex',
+        KeyConditionExpression: 'conversationId = :cid',
+        FilterExpression: 'callId = :callId AND callStatus = :status',
+        ExpressionAttributeValues: {
+          ':cid': conversationId,
+          ':callId': callId,
+          ':status': status
+        }
+      }).promise();
+      if (existingCheck.Items.length > 0) {
+        console.log('Duplicate call message prevented');
+        return null;
+      }
+      try {
+        await dynamoDB.put({
+          TableName: process.env.MESSAGE_TABLE,
+          Item: messageParams.Item || messageParams,
+          ConditionExpression: 'attribute_not_exists(callId) AND attribute_not_exists(callStatus)'
+        }).promise();
+      } catch (err) {
+        if (err.code === 'ConditionalCheckFailedException') {
+          console.log('Duplicate call message prevented by DynamoDB condition');
+          return null;
+        }
+        throw err;
+      }
+    } else {
+      await dynamoDB.put({
+        TableName: process.env.MESSAGE_TABLE,
+        Item: messageParams.Item || messageParams
+      }).promise();
+    }
 
     // Cập nhật conversation
     await upsertConversation(senderPhone, receiverPhone, {
@@ -827,10 +863,26 @@ const sendCallMessage = async ({ conversationId, senderPhone, receiverPhone, sta
       senderId: senderPhone
     });
 
-    // Gửi thông báo qua socket nếu người nhận đang online
+    // Gửi thông báo qua socket nếu người nhận hoặc người gửi đang online
     const receiverSocket = connectedUsers.get(receiverPhone);
     if (receiverSocket) {
       receiverSocket.emit('new-message', {
+        messageId,
+        conversationId,
+        senderPhone,
+        content,
+        timestamp,
+        status: 'delivered',
+        type: type || 'call',
+        callStatus: status,
+        duration: duration || 0,
+        callId
+      });
+    }
+    // Gửi cho cả sender nếu online (và không trùng receiver)
+    const senderSocket = connectedUsers.get(senderPhone);
+    if (senderSocket && senderPhone !== receiverPhone) {
+      senderSocket.emit('new-message', {
         messageId,
         conversationId,
         senderPhone,
