@@ -9,8 +9,6 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const jwt = require('jsonwebtoken');
 const User = require('./modules/user/userService');
-const https = require('https');
-const fs = require('fs');
 
 const PORT = process.env.PORT;
 
@@ -174,13 +172,7 @@ initializeChatSocket(io);
 initializeChatGroupSocket(io);
 initializeVideoSocket(io, connectedUsers);
 
-// Đọc SSL cert và key (chỉnh đường dẫn cho đúng với nơi bạn lưu file trên server)
-const sslOptions = {
-  key: fs.readFileSync('/home/ec2-user/ssl/server.key'),
-  cert: fs.readFileSync('/home/ec2-user/ssl/server.cert')
-};
-
-// Start HTTPS server
-https.createServer(sslOptions, app).listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server đang chạy tại https://localhost:${PORT}`);
+// Start server
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server đang chạy tại http://localhost:${PORT}`);
 });
