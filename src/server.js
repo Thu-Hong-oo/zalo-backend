@@ -68,7 +68,7 @@ const upload = multer({
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:8081","http://localhost:8082","http://ec2-54-255-209-87.ap-southeast-1.compute.amazonaws.com"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:8081","http://localhost:8082","https://zalow.netlify.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type", "Authorization", "Accept", "Content-Length", "X-Requested-With", "Access-Control-Allow-Origin"
