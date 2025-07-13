@@ -44,6 +44,7 @@ jobs:
           username: ${{ secrets.GCE_USER }}
           key: ${{ secrets.GCE_SSH_KEY }}
           script: |
+          export PATH=$PATH:/snap/bin
             if [ -d "/home/${{ secrets.GCE_USER }}/zalo-backend" ]; then
               cd /home/${{ secrets.GCE_USER }}/zalo-backend
               git reset --hard
