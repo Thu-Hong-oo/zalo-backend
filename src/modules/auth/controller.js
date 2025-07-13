@@ -4,6 +4,7 @@ const Joi = require('joi');//Xác thực dữ liệu đầu vào
 const User = require('../user/userService');
 const twilioService = require('../../services/twilioService');
 require('dotenv').config();
+const rateLimit = require('express-rate-limit');
 
 // Helper function to format phone number
 const formatPhoneNumber = (phone) => {
@@ -130,6 +131,13 @@ const changePasswordSchema = Joi.object({
             'string.min': 'Mật khẩu mới phải có ít nhất 6 ký tự',
             'any.required': 'Vui lòng nhập mật khẩu mới'
         })
+});
+
+// Rate limiter for OTP endpoints
+const otpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: { message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' }
 });
 
 // Send OTP for registration
@@ -354,8 +362,8 @@ const logout = async (req, res) => {
         }
 
         try {
-            // Try to decode token even if it's expired
-            const decoded = jwt.decode(token);
+            // Verify token (secure)
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (!decoded || !decoded.phone) {
                 return res.status(401).json({ message: 'Token không hợp lệ' });
             }
@@ -375,6 +383,12 @@ const logout = async (req, res) => {
             res.status(200).json({ message: 'Đăng xuất thành công' });
         } catch (tokenError) {
             console.error('Lỗi khi xử lý token:', tokenError);
+            if (tokenError.name === 'JsonWebTokenError') {
+                return res.status(401).json({ message: 'Token không hợp lệ' });
+            }
+            if (tokenError.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token đã hết hạn' });
+            }
             return res.status(401).json({ message: 'Token không hợp lệ' });
         }
     } catch (error) {
@@ -608,4 +622,4 @@ const authController = {
     requireOnlineStatus
 };
 
-module.exports = { authController }; 
+module.exports = { authController, otpLimiter }; 

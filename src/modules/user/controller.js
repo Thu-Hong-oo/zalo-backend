@@ -22,10 +22,6 @@ const dynamodb = DynamoDBDocumentClient.from(client);
 // Define updateAvatar function separately
 const updateAvatar = async (req, res) => {
 
-    console.log('--- Nhận request upload avatar ---');
-    console.log('req.headers:', req.headers);
-    console.log('req.body:', req.body);
-    console.log('req.file:', req.file);
     try {
         if (!req.file) {
             return res.status(400).json({
@@ -501,7 +497,6 @@ const getRecentContacts = async (req, res) => {
     }
 };
 
-// Export individual controller methods
 const userController = {
     getProfile,
     updateProfile,
