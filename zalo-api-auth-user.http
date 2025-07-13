@@ -5,7 +5,7 @@ POST http://localhost:3000/api/auth/register/send-otp
 Content-Type: application/json
 
 {
-    "phone": "0376963653"
+    "phone": "0376963652"
 }
 
 ### 2. Xác thực OTP đăng ký
@@ -13,8 +13,8 @@ POST http://localhost:3000/api/auth/register/verify-otp
 Content-Type: application/json
 
 {
-    "phone": "0376963653",
-    "otp": "629549"
+    "phone": "0376963652",
+    "otp": "502519"
 }
 
 ### 3. Hoàn tất đăng ký
@@ -22,8 +22,8 @@ POST http://localhost:3000/api/auth/register/complete
 Content-Type: application/json
 
 {
-    "phone": "0987654321",
-    "name": "Tôi chỉ là người test Group API",
+    "phone": "0376963652",
+    "name": "Như",
     "password": "123456"
 }
 
