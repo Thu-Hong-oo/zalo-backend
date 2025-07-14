@@ -2,13 +2,20 @@ name: Deploy to Cloud Run
 
 on:
   push:
+<<<<<<< HEAD
     branches: [ main ]
+=======
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+>>>>>>> 0bad84a9b3ff1c4d4a1dd47d9f5dc0bcd94a123b
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -20,6 +27,7 @@ jobs:
 
       - name: Configure Docker for GCR
         run: gcloud auth configure-docker
+
 
       - name: Build Docker image
         run: docker build -t gcr.io/zachat-465817/zalo-backend:${{ github.sha }} .
