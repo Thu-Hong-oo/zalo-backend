@@ -8,6 +8,7 @@ const path = require("path");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const jwt = require('jsonwebtoken');
+const User = require('./modules/user/userService');
 
 const PORT = process.env.PORT;
 
@@ -17,7 +18,9 @@ const userRoutes = require("./modules/user/routes");
 const groupRoutes = require("./modules/group/group.route");
 const friendRoutes = require("./modules/friend/routes");
 const conversationRoutes = require("./modules/conversation/routes");
+
 const { routes: videoCallRoutes, initializeVideoSocket } = require("./modules/videoCall/videoCall.route");
+
 const {
   routes: chatGroupRoutes,
   socket: initializeChatGroupSocket,
@@ -65,7 +68,7 @@ const upload = multer({
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:8081","http://localhost:8082"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:8081","http://localhost:8082","https://zazachat.netlify.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type", "Authorization", "Accept", "Content-Length", "X-Requested-With", "Access-Control-Allow-Origin"
@@ -99,7 +102,7 @@ app.use("/api/chat-group", chatGroupRoutes);
 app.use("/api/video-call", videoCallRoutes);
 
 // Socket authentication middleware
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token;
     if (!token) {
@@ -108,17 +111,25 @@ io.use((socket, next) => {
 
     // Remove 'Bearer ' prefix if exists
     const tokenString = token.startsWith('Bearer ') ? token.slice(7) : token;
-
-    // Verify token
     const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
-    socket.user = decoded;
-    
+
+    // Lấy user từ DB
+    const user = await User.getByPhone(decoded.phone);
+    console.log('User:', user);
+    if (!user) return next(new Error('User not found'));
+
+    socket.user = {
+      phone: user.phone,
+      name: user.name,
+      avatar: user.avatar || null
+    };
+
     // Store socket in connectedUsers Map
-    if (decoded.phone) {
-      connectedUsers.set(decoded.phone, socket);
+    if (user.phone) {
+      connectedUsers.set(user.phone, socket);
     }
-    
-    console.log('Socket authenticated for user:', decoded);
+
+    console.log('Socket authenticated for user:', socket.user);
     next();
   } catch (err) {
     console.error('Socket authentication error:', err);

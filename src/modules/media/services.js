@@ -3,7 +3,6 @@ const path = require('path');
 
 const MAX_FILE_SIZE = 10*1024 * 1024; 
 const MAX_TOTAL_SIZE = 10*1024 * 1024;
-
 const FILE_TYPE_MATCH = [
     "image/png",
     "image/jpeg",
@@ -17,7 +16,11 @@ const FILE_TYPE_MATCH = [
     "application/vnd.rar",
     "application/zip",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/x-compressed",
+    "application/x-rar-compressed",
+    "application/vnd.ms-excel"
 ];
 
 const validateFile = (file) => {
@@ -55,9 +58,12 @@ const uploadSingleFile = (file) => {
         throw error;
     }
 
+    // Tạo key duy nhất
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 8);
-    const key = `${file.originalname}`;
+    const fileExtension = path.extname(file.originalname);
+    const fileNameWithoutExt = path.basename(file.originalname, fileExtension);
+    const key = `${fileNameWithoutExt}_${timestamp}_${randomStr}${fileExtension}`;
 
     const params = {
         Bucket: BUCKETS.MEDIA,

@@ -28,22 +28,42 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ec2-user/zalo-backend
-          git pull origin main
-          echo "${{ secrets.ENV_FILE }}" > .env
-          docker build -t zalo-backend .
-          docker stop zalo-backend || true
-          docker rm zalo-backend || true
-          docker run -d \
-            --name zalo-backend \
-            --restart unless-stopped \
-            --env-file .env \
-            -p 3000:3000 \
-            zalo-backend
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: SSH and deploy to GCE
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCE_HOST }}
+          username: ${{ secrets.GCE_USER }}
+          key: ${{ secrets.GCE_SSH_KEY }}
+          script: |
+            export PATH=$PATH:/snap/bin
+            if [ -d "/home/${{ secrets.GCE_USER }}/zalo-backend" ]; then
+              cd /home/${{ secrets.GCE_USER }}/zalo-backend
+              git reset --hard
+              git clean -fd
+              git pull origin main --rebase
+            else
+              git clone https://github.com/Thu-Hong-oo/zalo-backend.git /home/${{ secrets.GCE_USER }}/zalo-backend
+              cd /home/${{ secrets.GCE_USER }}/zalo-backend
+            fi
+
+            echo "${{ secrets.ENV_FILE }}" > .env
+            docker build -t zalo-backend .
+            docker stop zalo-backend || true
+            docker rm zalo-backend || true
+            docker run -d \
+              --name zalo-backend \
+              --restart unless-stopped \
+              --env-file .env \
+              -p 3000:3000 \
+              zalo-backend
+
