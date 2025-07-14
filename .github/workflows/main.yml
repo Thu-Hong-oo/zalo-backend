@@ -2,13 +2,8 @@ name: Deploy to Cloud Run
 
 on:
   push:
-<<<<<<< HEAD
+
     branches: [ main ]
-=======
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
->>>>>>> 0bad84a9b3ff1c4d4a1dd47d9f5dc0bcd94a123b
 
 jobs:
   build-and-deploy:
