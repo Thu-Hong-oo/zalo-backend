@@ -1,32 +1,13 @@
-name: CI/CD Pipeline
+name: Deploy to Cloud Run
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  build-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-      
-    - name: Build Docker image
-      run: docker build -t zalo-backend .
-      
-    - name: Run tests in Docker
-      run: docker run zalo-backend npm test
-      
-  deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,33 +16,21 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: zachat-465817
 
-      - name: SSH and deploy to GCE
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.GCE_HOST }}
-          username: ${{ secrets.GCE_USER }}
-          key: ${{ secrets.GCE_SSH_KEY }}
-          script: |
-            export PATH=$PATH:/snap/bin
-            if [ -d "/home/${{ secrets.GCE_USER }}/zalo-backend" ]; then
-              cd /home/${{ secrets.GCE_USER }}/zalo-backend
-              git reset --hard
-              git clean -fd
-              git pull origin main --rebase
-            else
-              git clone https://github.com/Thu-Hong-oo/zalo-backend.git /home/${{ secrets.GCE_USER }}/zalo-backend
-              cd /home/${{ secrets.GCE_USER }}/zalo-backend
-            fi
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
 
-            echo "${{ secrets.ENV_FILE }}" > .env
-            docker build -t zalo-backend .
-            docker stop zalo-backend || true
-            docker rm zalo-backend || true
-            docker run -d \
-              --name zalo-backend \
-              --restart unless-stopped \
-              --env-file .env \
-              -p 3000:3000 \
-              zalo-backend
+      - name: Build Docker image
+        run: docker build -t gcr.io/zachat-465817/zalo-backend:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: docker push gcr.io/zachat-465817/zalo-backend:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy zalo-backend \
+            --image gcr.io/zachat-465817/zalo-backend:${{ github.sha }} \
+            --platform managed \
+            --region asia-southeast1 \
+            --allow-unauthenticated
