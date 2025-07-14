@@ -18,11 +18,11 @@ Content-Type: application/json
 }
 
 ### 3. Hoàn tất đăng ký
-POST http://localhost:3000/api/auth/register/complete
+POST http://34.143.138.172:3000/api/auth/register/complete
 Content-Type: application/json
 
 {
-    "phone": "0987654321",
+    "phone": "0123456789",
     "name": "Tôi chỉ là người test Group API",
     "password": "123456"
 }
@@ -30,7 +30,7 @@ Content-Type: application/json
 ### ========== ĐĂNG NHẬP/ĐĂNG XUẤT ==========
 
 ### Đăng nhập
-POST https://ec2-54-255-209-87.ap-southeast-1.compute.amazonaws.com/api/auth/login
+POST http://34.143.138.172:3000/api/auth/login
 Content-Type: application/json
 
 {
